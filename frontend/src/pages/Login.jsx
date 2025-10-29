@@ -3,6 +3,7 @@ import { Form, Input, Button, Card, message } from 'antd'
 import { UserOutlined, LockOutlined, MailOutlined } from '@ant-design/icons'
 import axios from 'axios'
 import { setToken } from '../utils/auth'
+import { fetchCsrfToken } from '../utils/api'
 
 const Login = ({ onLogin }) => {
   const [loading, setLoading] = useState(false)
@@ -12,6 +13,10 @@ const Login = ({ onLogin }) => {
     try {
       const response = await axios.post('/api/auth/login', values)
       setToken(response.data.token)
+
+      // Fetch CSRF token after successful login
+      await fetchCsrfToken()
+
       message.success('Login successful!')
       onLogin()
     } catch (error) {
