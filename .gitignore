@@ -1,0 +1,91 @@
+# Environment
+.env
+.env.local
+.env.*.local
+.env.production
+backend/.env
+frontend/.env
+
+# Dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+
+# Database
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
+data/
+backend/data/
+
+# Build outputs
+dist/
+build/
+.next/
+out/
+frontend/dist/
+frontend/build/
+
+# Logs
+logs/
+*.log
+backend/logs/
+pm2-logs/
+
+# SSL Certificates
+nginx/ssl/*.pem
+nginx/ssl/*.key
+*.pem
+*.crt
+
+# DKIM Keys
+*.key
+!.gitkeep
+config/dkim/
+
+# OS
+.DS_Store
+Thumbs.db
+.DS_Store?
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*.iml
+.project
+.classpath
+.settings/
+
+# Docker
+docker-compose.override.yml
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# PM2
+.pm2/
+
+# Test coverage
+coverage/
+.nyc_output/
+
+# Cache
+.cache/
+.parcel-cache/
+
+# System
+*.pid
+*.seed
+*.pid.lock
+
+# Backups
+*.backup
+*.bak

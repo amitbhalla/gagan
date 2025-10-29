@@ -1,0 +1,65 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+/* Ant Design overrides */
+.ant-layout {
+  min-height: 100vh;
+}
+
+.ant-layout-header {
+  padding: 0 24px;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.ant-layout-content {
+  padding: 24px;
+  background: #f0f2f5;
+}
+
+.ant-layout-sider {
+  background: #001529;
+}
+
+/* React Quill editor styles */
+.quill {
+  background: white;
+}
+
+.ql-container {
+  min-height: 300px;
+  font-size: 14px;
+}
+
+.ql-editor {
+  min-height: 300px;
+}
+
+/* Custom utilities */
+.page-header {
+  margin-bottom: 24px;
+}
+
+.stats-card {
+  margin-bottom: 16px;
+}
+
+.table-actions {
+  display: flex;
+  gap: 8px;
+}

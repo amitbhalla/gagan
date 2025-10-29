@@ -1,0 +1,26 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(chmod:*)",
+      "Bash(npm install)",
+      "Bash(npm install:*)",
+      "Bash(node -c:*)",
+      "Bash(node:*)",
+      "Bash(npm run build:*)",
+      "Bash(test:*)",
+      "Bash(curl:*)",
+      "Bash(bash)",
+      "Bash(export NVM_DIR=\"$HOME/.nvm\")",
+      "Bash([ -s \"$NVM_DIR/nvm.sh\" ])",
+      "Bash(. \"$NVM_DIR/nvm.sh\")",
+      "Bash(nvm install:*)",
+      "Bash(npm run dev:*)",
+      "Bash(find:*)",
+      "Bash(sqlite3:*)",
+      "Bash([ -f .gitignore ])",
+      "Bash(cat:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
