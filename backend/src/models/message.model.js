@@ -1,6 +1,6 @@
 const { db } = require('../config/database');
 const logger = require('../config/logger');
-const { nanoid } = require('nanoid');
+const crypto = require('crypto');
 
 class MessageModel {
   /**
@@ -10,7 +10,7 @@ class MessageModel {
    */
   static create(data) {
     try {
-      const trackingToken = nanoid(32); // Generate unique tracking token
+      const trackingToken = crypto.randomBytes(32).toString('hex').substring(0, 32); // Generate unique tracking token
       const messageId = this.generateMessageId(data.campaign_id);
 
       const query = `
@@ -54,7 +54,7 @@ class MessageModel {
       const insertMany = db.transaction((ids) => {
         for (const contactId of ids) {
           const messageId = this.generateMessageId(campaignId);
-          const trackingToken = nanoid(32);
+          const trackingToken = crypto.randomBytes(32).toString('hex').substring(0, 32);
           insert.run(campaignId, contactId, messageId, trackingToken);
         }
       });

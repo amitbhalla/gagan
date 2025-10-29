@@ -14,12 +14,17 @@ const Lists = () => {
   const [modalVisible, setModalVisible] = useState(false)
   const [fieldsModalVisible, setFieldsModalVisible] = useState(false)
   const [segmentModalVisible, setSegmentModalVisible] = useState(false)
+  const [subscribersModalVisible, setSubscribersModalVisible] = useState(false)
   const [editingList, setEditingList] = useState(null)
   const [customFields, setCustomFields] = useState([])
   const [filters, setFilters] = useState([])
   const [segmentResults, setSegmentResults] = useState([])
   const [segmentCount, setSegmentCount] = useState(0)
   const [segmentLoading, setSegmentLoading] = useState(false)
+  const [subscribers, setSubscribers] = useState([])
+  const [allContacts, setAllContacts] = useState([])
+  const [subscribersLoading, setSubscribersLoading] = useState(false)
+  const [selectedContacts, setSelectedContacts] = useState([])
   const [form] = Form.useForm()
 
   useEffect(() => {
@@ -185,6 +190,63 @@ const Lists = () => {
     }
   }
 
+  const handleManageSubscribers = async (list) => {
+    setEditingList(list)
+    setSubscribersLoading(true)
+    setSubscribersModalVisible(true)
+    try {
+      const [subsRes, contactsRes] = await Promise.all([
+        api.get(`/lists/${list.id}/subscribers`),
+        api.get('/contacts')
+      ])
+      setSubscribers(subsRes.data.subscribers || [])
+      setAllContacts(contactsRes.data.contacts || [])
+    } catch (error) {
+      message.error('Failed to load subscribers')
+    } finally {
+      setSubscribersLoading(false)
+    }
+  }
+
+  const handleAddSubscribers = async () => {
+    if (selectedContacts.length === 0) {
+      message.warning('Please select contacts to add')
+      return
+    }
+
+    try {
+      setSubscribersLoading(true)
+      await Promise.all(
+        selectedContacts.map(contactId =>
+          api.post(`/lists/${editingList.id}/subscribers`, { contact_id: contactId })
+        )
+      )
+      message.success(`Added ${selectedContacts.length} contact(s) to list`)
+      setSelectedContacts([])
+      // Reload subscribers
+      const response = await api.get(`/lists/${editingList.id}/subscribers`)
+      setSubscribers(response.data.subscribers || [])
+      loadLists() // Refresh subscriber counts
+    } catch (error) {
+      message.error('Failed to add subscribers')
+    } finally {
+      setSubscribersLoading(false)
+    }
+  }
+
+  const handleRemoveSubscriber = async (contactId) => {
+    try {
+      await api.delete(`/lists/${editingList.id}/subscribers/${contactId}`)
+      message.success('Contact removed from list')
+      // Reload subscribers
+      const response = await api.get(`/lists/${editingList.id}/subscribers`)
+      setSubscribers(response.data.subscribers || [])
+      loadLists() // Refresh subscriber counts
+    } catch (error) {
+      message.error('Failed to remove subscriber')
+    }
+  }
+
   const columns = [
     {
       title: 'Name',
@@ -218,6 +280,13 @@ const Lists = () => {
       key: 'actions',
       render: (_, record) => (
         <Space>
+          <Button
+            type="link"
+            icon={<TeamOutlined />}
+            onClick={() => handleManageSubscribers(record)}
+          >
+            Subscribers
+          </Button>
           <Button
             type="link"
             icon={<FilterOutlined />}
@@ -502,6 +571,132 @@ const Lists = () => {
             />
           </Card>
         )}
+      </Modal>
+
+      <Modal
+        title={`Manage Subscribers: ${editingList?.name || ''}`}
+        open={subscribersModalVisible}
+        onCancel={() => {
+          setSubscribersModalVisible(false)
+          setSelectedContacts([])
+        }}
+        width={1000}
+        footer={null}
+      >
+        <Space direction="vertical" style={{ width: '100%' }} size="large">
+          {/* Current Subscribers */}
+          <Card
+            title={`Current Subscribers (${subscribers.length})`}
+            size="small"
+            style={{ marginBottom: 16 }}
+          >
+            <Table
+              dataSource={subscribers}
+              rowKey="id"
+              loading={subscribersLoading}
+              pagination={{ pageSize: 5 }}
+              size="small"
+              columns={[
+                {
+                  title: 'Email',
+                  dataIndex: 'email',
+                  key: 'email'
+                },
+                {
+                  title: 'Name',
+                  key: 'name',
+                  render: (_, record) => `${record.first_name || ''} ${record.last_name || ''}`.trim() || '-'
+                },
+                {
+                  title: 'Status',
+                  dataIndex: 'status',
+                  key: 'status',
+                  render: (status) => (
+                    <Tag color={status === 'active' ? 'green' : status === 'bounced' ? 'red' : 'default'}>
+                      {status}
+                    </Tag>
+                  )
+                },
+                {
+                  title: 'Subscribed',
+                  dataIndex: 'subscribed_at',
+                  key: 'subscribed_at',
+                  render: (date) => date ? new Date(date).toLocaleDateString() : '-'
+                },
+                {
+                  title: 'Action',
+                  key: 'action',
+                  render: (_, record) => (
+                    <Popconfirm
+                      title="Remove this contact from the list?"
+                      onConfirm={() => handleRemoveSubscriber(record.id)}
+                      okText="Yes"
+                      cancelText="No"
+                    >
+                      <Button type="link" danger size="small">
+                        Remove
+                      </Button>
+                    </Popconfirm>
+                  )
+                }
+              ]}
+            />
+          </Card>
+
+          {/* Add Subscribers */}
+          <Card
+            title="Add Contacts to List"
+            size="small"
+            extra={
+              <Button
+                type="primary"
+                onClick={handleAddSubscribers}
+                disabled={selectedContacts.length === 0}
+                loading={subscribersLoading}
+              >
+                Add Selected ({selectedContacts.length})
+              </Button>
+            }
+          >
+            <Table
+              dataSource={allContacts.filter(contact =>
+                !subscribers.some(sub => sub.id === contact.id)
+              )}
+              rowKey="id"
+              loading={subscribersLoading}
+              pagination={{ pageSize: 5 }}
+              size="small"
+              rowSelection={{
+                selectedRowKeys: selectedContacts,
+                onChange: (selectedRowKeys) => {
+                  setSelectedContacts(selectedRowKeys)
+                }
+              }}
+              columns={[
+                {
+                  title: 'Email',
+                  dataIndex: 'email',
+                  key: 'email'
+                },
+                {
+                  title: 'Name',
+                  key: 'name',
+                  render: (_, record) => `${record.first_name || ''} ${record.last_name || ''}`.trim() || '-'
+                },
+                {
+                  title: 'Status',
+                  dataIndex: 'status',
+                  key: 'status',
+                  render: (status) => (
+                    <Tag color={status === 'active' ? 'green' : status === 'bounced' ? 'red' : 'default'}>
+                      {status}
+                    </Tag>
+                  )
+                }
+              ]}
+            />
+          </Card>
+        </Space>
       </Modal>
     </div>
   )
